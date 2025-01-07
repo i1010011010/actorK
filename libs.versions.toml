@@ -1,0 +1,15 @@
+[versions]
+coroutines = "1.10.1"
+kotlin = "2.1.0"
+logback-classic = "1.5.15"
+
+[libraries]
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "coroutines" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
+[bundles]
+
+coroutines = ["kotlinx-coroutines", "kotlinx-coroutines-slf4j"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
