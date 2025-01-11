@@ -37,9 +37,7 @@ internal fun <T> actorContext(
                 withTimeout(duration) {
                     askPattern(targetActor, duration, msgFactory).await()
                 }
-            }
-                .onSuccess { answer -> self tell answer }
-                .onFailure { failure -> self tell failure as T }
+            }.onSuccess { answer -> pipeToSelf(answer) }
         }.join()
 
 
