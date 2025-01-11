@@ -9,6 +9,7 @@ sealed interface ThirdActorProtocol : Protocol
 data class MessageToFirstActor(val content: String) : FirstActorProtocol
 data class ResponseToFirstActor(val content: String) : FirstActorProtocol
 data object FirstActorTerminationSignal: FirstActorProtocol
+data class AskToSecondActor(val content: String,val replyTo: ActorRef<FirstActorProtocol>) : SecondActorProtocol
 data class MessageToSecondActor(val content: String, val replyTo: ActorRef<FirstActorTerminationSignal>) : SecondActorProtocol
 data class ResponseToSecondActor(val content: String, val replyTo: ActorRef<FirstActorTerminationSignal>) : SecondActorProtocol
 data class MessageToThirdActor(val content: String, val replyTo: ActorRef<FirstActorTerminationSignal>) : ThirdActorProtocol

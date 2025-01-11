@@ -56,6 +56,8 @@ object Example2 {
                     ctx.spawn(Example3()) tell MessageToThirdActor("message to example3", msg.replyTo)
                     same()
                 }
+
+                is AskToSecondActor -> throw IllegalStateException()
             }
         }
     }

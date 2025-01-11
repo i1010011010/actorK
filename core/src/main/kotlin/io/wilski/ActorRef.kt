@@ -13,6 +13,7 @@ interface ActorRef<in T> {
      * @return Unit
      */
     suspend infix fun tell(msg: T)
+    fun <U : T> unsafeUpcast(): ActorRef<U>
 }
 
 /**
@@ -22,4 +23,7 @@ interface ActorRef<in T> {
  */
 internal fun <T> actorRef(mailbox: SendChannel<T>): ActorRef<T> = object : ActorRef<T> {
     override suspend fun tell(msg: T) = mailbox.send(msg)
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <U : T> unsafeUpcast(): ActorRef<U> = this as ActorRef<U>
 }

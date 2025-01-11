@@ -1,14 +1,19 @@
 package io.wilski
 
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
 interface ActorContext<T> {
+    suspend fun <Req> ask(
+        targetActor: ActorRef<Req>,
+        duration: Duration,
+        msgFactory: (ActorRef<T>) -> Req
+    )
+
     fun self(): ActorRef<T>
     fun name(): String
     fun log(): Logger
@@ -23,6 +28,21 @@ internal fun <T> actorContext(
     scope: CoroutineScope,
 ): ActorContext<T> =
     object : ActorContext<T> {
+        override suspend fun <Req> ask(
+            targetActor: ActorRef<Req>,
+            duration: Duration,
+            msgFactory: (ActorRef<T>) -> Req
+        ) = scope.launch {
+            runCatching {
+                withTimeout(duration) {
+                    askPattern(targetActor, duration, msgFactory).await()
+                }
+            }
+                .onSuccess { answer -> self tell answer }
+                .onFailure { failure -> self tell failure as T }
+        }.join()
+
+
         override fun self(): ActorRef<T> = self
         override fun name(): String = name
         override fun log(): Logger = LoggerFactory.getLogger(name)
@@ -35,5 +55,7 @@ internal fun <T> actorContext(
         )
     }
 
-private fun buildCoroutineContext(parentJob: Job, name: String): CoroutineContext = parentJob + CoroutineName(name)
+private fun buildCoroutineContext(parentJob: Job, name: String): CoroutineContext =
+    parentJob + CoroutineName(name)
+
 private fun anonymousName(): String = "\$actor-${SecureRandom().nextLong(Long.MAX_VALUE)}"
