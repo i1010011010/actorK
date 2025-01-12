@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    id("java-library")
+    id("maven-publish")
 }
 
 group = "io.wilski.actorsK"
@@ -16,4 +18,15 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.jar {
+    manifest {
+        attributes(mapOf("Implementation-Title" to project.name,
+            "Implementation-Version" to project.version))
+    }
 }
