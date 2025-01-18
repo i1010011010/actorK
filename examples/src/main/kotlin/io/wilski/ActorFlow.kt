@@ -1,10 +1,11 @@
 package io.wilski
 
+import io.wilski.ActorFlowPattern.actorFlow
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.random.Random
 
 
@@ -65,7 +66,7 @@ suspend fun main() {
         actorFlow<TickReceiverProtocol, Tick>(TradingAppBackend()) { ref ->
             GetTicks("interactive Brokers", "AAPL", ref)
         }.collect { tick ->
-            logger.info("Data provider: $tick.provider | Symbol: $tick.symbol | Price: $tick.price")
+            logger.info("Data provider: ${tick.provider} | Symbol: ${tick.symbol} | Price: $${tick.price}")
         }
     }
 }
@@ -84,7 +85,7 @@ object TradingAppBackend {
                     handleStockExchangeResponse(msg.replyTo)
                 }
 
-                is TickStreamData -> throw IllegalStateException("Wrong message type")
+                is TickStreamData -> error("Wrong message type")
             }
         }
     }
@@ -92,7 +93,7 @@ object TradingAppBackend {
 
 fun handleStockExchangeResponse(replyTo: ActorRef<Tick>): Behavior<TickReceiverProtocol> = receiveMessage { tick ->
     when (tick) {
-        is GetTicks -> throw IllegalStateException("Wrong message type")
+        is GetTicks -> error("Wrong message type")
         is TickStreamData -> {
             replyTo tell Tick(tick.provider, tick.symbol, tick.price)
             same()
@@ -108,14 +109,13 @@ object StockExchange {
                 msg.replyTo tell TickStreamData(msg.provider, msg.symbol, generateRandomStockPrice())
                 delay(Random.nextLong(320))
             }
-
             same()
         }
     }
 }
 
 fun generateRandomStockPrice(): BigDecimal {
-    val min = BigDecimal("100.00")
+    val min = BigDecimal("197.00")
     val max = BigDecimal("200.00")
     val range = max.subtract(min)
     val randomDecimal = BigDecimal(Random.nextDouble())
