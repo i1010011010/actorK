@@ -88,7 +88,7 @@ private object AuditLoggingActor {
     operator fun invoke(): Behavior<AuditLoggingProtocol> = setup { ctx ->
         receiveMessage { auditLog ->
             ctx.log().info("[${ctx.name()}] register changes: ${auditLog.changes}, at timestamp: ${auditLog.timestamp}")
-            same()
+            stopped()
         }
     }
 }

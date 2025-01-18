@@ -38,7 +38,7 @@ object Customer {
 
                 is SellerAnswer -> {
                     ctx.log().info("damn, I don't have that much money, the customer thought")
-                    same()
+                    stopped()
                 }
             }
         }
@@ -55,7 +55,7 @@ object Seller {
                     val sellerAnswer = SellerAnswer("Hi, this laptop costs \$2500.")
                     msg.replyTo tell sellerAnswer
                     ctx.log().info(sellerAnswer.answer)
-                    same()
+                    stopped()
                 }
             }
         }

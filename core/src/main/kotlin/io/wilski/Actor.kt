@@ -29,14 +29,14 @@ internal fun <T> actor(name: String, mailbox: Channel<T>, job: Job, scope: Corou
 
                 is Stopped -> {
                     mailbox.close()
-                    ctx.log().info("actor: $name has been stopped.")
+                    ctx.log().debug("$name has been stopped.")
                     job.cancelAndJoin()
                 }
 
                 is StoppedWithEffect -> {
                     val newBehavior: Behavior<T> = initialBehavior.postStop(ctx)
                     mailbox.close()
-                    ctx.log().debug("actor: $name has been stopped with effect.")
+                    ctx.log().debug("$name has been stopped with effect.")
                     job.cancelAndJoin()
                     nextBehavior(newBehavior, initialBehavior)
                 }

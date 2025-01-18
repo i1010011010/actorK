@@ -30,7 +30,7 @@ object AskExample1 {
 
                 is ResponseToFirstActor -> {
                     ctx.log().info("AskExample1.ResponseToFirstActor received response ${msg.content}")
-                    same()
+                    stopped()
                 }
             }
         }
