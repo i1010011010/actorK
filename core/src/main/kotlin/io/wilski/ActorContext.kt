@@ -1,16 +1,20 @@
 package io.wilski
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.security.SecureRandom
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 interface ActorContext<T> {
     suspend fun <Req> ask(
         targetActor: ActorRef<Req>,
-        duration: Duration,
+        duration: Duration = 500.milliseconds,
         msgFactory: (ActorRef<T>) -> Req
     )
 
@@ -34,11 +38,15 @@ internal fun <T> actorContext(
             msgFactory: (ActorRef<T>) -> Req
         ) = scope.launch {
             runCatching {
-                withTimeout(duration) {
-                    askPattern(targetActor, duration, msgFactory).await()
+                AskPattern.ask(targetActor, duration, msgFactory).await()
+            }
+                .onSuccess { answer -> pipeToSelf(answer) }
+                .onFailure { ex ->
+                    log().debug("ask function in context:${name()} has failed, cause: ${ex.message}")
+                    scope.cancel()
                 }
-            }.onSuccess { answer -> pipeToSelf(answer) }
-        }.join()
+        }
+            .join()
 
 
         override fun self(): ActorRef<T> = self
@@ -56,4 +64,4 @@ internal fun <T> actorContext(
 private fun buildCoroutineContext(parentJob: Job, name: String): CoroutineContext =
     parentJob + CoroutineName(name)
 
-private fun anonymousName(): String = "\$actor-${SecureRandom().nextLong(Long.MAX_VALUE)}"
+private fun anonymousName(): String = "\$actor-${System.nanoTime()}"
