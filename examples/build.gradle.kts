@@ -3,14 +3,15 @@ plugins {
 }
 
 group = "io.wilski.actorsK"
-version = "0.1.0"
+version = libs.versions.project
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(libs.actorsK.core)
     implementation(libs.bundles.coroutines)
     implementation(libs.logback.classic)
 }

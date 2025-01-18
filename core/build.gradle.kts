@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.wilski.actorsK"
-version = "0.1.0"
+version = libs.versions.project
 
 repositories {
     mavenCentral()
@@ -28,5 +28,16 @@ tasks.jar {
     manifest {
         attributes(mapOf("Implementation-Title" to project.name,
             "Implementation-Version" to project.version))
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = group.toString()
+            artifactId = "core"
+            version = version.toString()
+            from(components["kotlin"])
+        }
     }
 }
