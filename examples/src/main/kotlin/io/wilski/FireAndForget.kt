@@ -29,7 +29,7 @@ object MessageReceiver {
     operator fun invoke(): Behavior<SendMessage> = setup { ctx ->
         receiveMessage { msg ->
             ctx.log().info("Received message: $msg")
-            same()
+            stopped()
         }
     }
 }

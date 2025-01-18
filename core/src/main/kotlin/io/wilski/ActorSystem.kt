@@ -1,6 +1,7 @@
 package io.wilski
 
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 
 interface ActorSystem<in T> {
@@ -18,11 +19,10 @@ suspend fun <T> actorsKSystem(
     }
 }
 
-suspend fun <T> actorsKSystem(
+fun <T> CoroutineScope.actorsKSystem(
     guardianBehavior: Behavior<T>,
     name: String = "default-system",
-): ActorRef<T> = coroutineScope {
-    createActorScope<T>(guardianBehavior, name, this, CoroutineName(name))
-}
+): ActorRef<T> = createActorScope<T>(guardianBehavior, name, this, CoroutineName(name))
+
 
 

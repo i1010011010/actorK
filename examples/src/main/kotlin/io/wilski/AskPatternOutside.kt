@@ -1,5 +1,6 @@
 package io.wilski
 
+import kotlinx.coroutines.coroutineScope
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -36,15 +37,19 @@ import kotlin.time.Duration.Companion.seconds
  */
 
 suspend fun main() {
-    println(QuestionerFromOutsideTheActorSystem.ask())
+    val result = QuestionerFromOutsideTheActorSystem.ask()
+    println(result)
 }
 
 @JvmInline
 value class Answer(val answer: String)
 object QuestionerFromOutsideTheActorSystem {
     suspend fun ask(): Answer =
-        askPattern<QuestionFromOutsideTheActorSystem, Answer>(actorsKSystem(AnswerActor()), 2.seconds)
-        { replyTo: ActorRef<Answer> -> QuestionFromOutsideTheActorSystem("I'm asking to you!", replyTo) }.await()
+        coroutineScope {
+            AskPattern.ask<QuestionFromOutsideTheActorSystem, Answer>(actorsKSystem(AnswerActor()), 2.seconds)
+            { replyTo: ActorRef<Answer> -> QuestionFromOutsideTheActorSystem("I'm asking to you!", replyTo) }
+                .await()
+        }
 }
 
 
@@ -53,7 +58,8 @@ object AnswerActor {
     operator fun invoke(): Behavior<QuestionFromOutsideTheActorSystem> = setup { ctx ->
         receiveMessage { msg ->
             msg.ref tell Answer("NO!!!")
-            same()
+            ctx.log().info("answer from QuestionFromOutsideTheActorSystem sent ")
+            stopped()
         }
     }
 }

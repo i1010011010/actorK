@@ -14,4 +14,6 @@ internal fun <T> createActorScope(
     mailbox: Channel<T> = Channel<T>(capacity = Channel.UNLIMITED),
 ): ActorRef<T> =
     scope.launch(context)
-    { actor(name, mailbox, coroutineContext.job, scope).run(behavior) }.let { actorRef(mailbox) }
+    { actor(name, mailbox, coroutineContext.job, scope).run(behavior) }
+        .let {
+            actorRef(mailbox) }

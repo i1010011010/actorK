@@ -5,7 +5,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.yield
-import java.util.UUID
 
 internal interface Actor<T> {
     suspend fun run(initialBehavior: Behavior<T>)
@@ -18,7 +17,7 @@ internal fun <T> actor(name: String, mailbox: Channel<T>, job: Job, scope: Corou
             when (initialBehavior) {
                 is Setup -> {
                     val newBehavior = initialBehavior.init(ctx)
-                    ctx.log().info("actor ${ctx.name()} created") //FIXME: Zmienić na debug i dodać obsługę ustawień
+                    ctx.log().debug("actor ${ctx.name()} created") //FIXME: Zmienić na debug i dodać obsługę ustawień
                     nextBehavior(newBehavior, initialBehavior)
                 }
 
@@ -37,13 +36,13 @@ internal fun <T> actor(name: String, mailbox: Channel<T>, job: Job, scope: Corou
                 is StoppedWithEffect -> {
                     val newBehavior: Behavior<T> = initialBehavior.postStop(ctx)
                     mailbox.close()
-                    ctx.log().info("actor: $name has been stopped with effect.")
+                    ctx.log().debug("actor: $name has been stopped with effect.")
                     job.cancelAndJoin()
                     nextBehavior(newBehavior, initialBehavior)
                 }
 
-                is Same -> throw IllegalStateException("The INSTANCE of Same is illegal")
-                is BehaviorBuilder<*> -> throw IllegalStateException("The INSTANCE of BehaviorBuilder is illegal")
+                is Same -> error("The INSTANCE of Same is illegal")
+                is BehaviorBuilder<*> -> error("The INSTANCE of BehaviorBuilder is illegal")
             }
         }
         yield()
